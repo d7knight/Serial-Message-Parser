@@ -13,7 +13,7 @@ I programmed the serial message parser in C++ and also used Jetbrains Clion IDE.
 4. execute `make`  
 5. execute `./skyladders`  
 
--There are three messages with message id's 1,2 and 3 being read from the serial adapter. Furthermore there is garbage data being rceived between each of the messages. It is intentional that some messages don't have a matching checksum to test out the parser's discarding behaviour.
+-There are three messages with message id's 1,2 and 3 being read from the serial adapter. Furthermore there is garbage data being received between each of the messages. It is intentional that there are some messages that don't have a matching checksum to test out the parser's discarding behaviour.
 
 [Instructions](SoftwareSkillsAssignment.pdf)
 

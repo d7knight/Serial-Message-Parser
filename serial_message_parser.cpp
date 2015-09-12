@@ -1,59 +1,48 @@
+//
+// Created by david on 12/09/15.
+//
+
+#include "serial_message_parser.h"
 #include <iostream>
-#include <exception>
-#include <vector>
-#include <boost/crc.hpp>      // for boost::crc_basic, boost::augmented_crc
+#include <iomanip>
+#include <bitset>
 #include "serial_adapter.h"
 #include "helper.h"
 
-#include <cassert>
-#include <netinet/in.h>
 
-namespace {
-    const char SEPARATOR = 0xFE;
-    const char START_BYTE = 0xFF;
-    const int RESERVED_SIZE = 3;
-    const int HEADER_SIZE = 5;
-    const int PAYLOAD_SIZE = 4;
-    const int CHECKSUM_SIZE = 5;
-    const int SEPERATOR_SIZE = 1;
-    const int MAX_MESSAGE_SIZE = 100;
-    const int START_FLAG_LENGTH = 5;
-    const char START_FLAG[] = {START_BYTE, START_BYTE, START_BYTE, START_BYTE,
-                               START_BYTE};
-}
 
 using namespace std;
 
-bool read_all(char *buffer, int len);
-
-char *parse_message(unsigned int &message_length, unsigned int &message_id,string & result_string);
-
-bool is_valid(char *message, unsigned int message_length);
-
-int get_crc_32(const string &my_string);
 
 int main() {
-    int counter = 0;
-
+    int start_flag_counter = 0;
+    int garbage_data;
     while (true) {
 
         char data[1];
+
         int ret = read_all(data, 1);
         if (!ret)continue;
         if (*data == START_BYTE) {
-            counter++;
-            if (counter == 5) {
+            start_flag_counter++;
+            if (start_flag_counter == 5) {
                 unsigned int message_length, message_id;
-                string result_string;
-                char *message = parse_message(message_length, message_id,result_string);
+                char *message = parse_message(message_length, message_id);
                 bool valid = is_valid(message, message_length);
-                if (valid)
+                cout << "Received Message with ID: "<< message_id<<" "
+                << (valid?" Valid Message - Processing Message": " Invalid Message - Discarding Message")<< endl;
+
+
+                if (valid) {
                     process_message(message, message_length);
-                counter = 0;
+                }
+                start_flag_counter = 0;
+                delete message;
+                message=NULL;
             }
 
         } else {
-            counter = 0;
+            start_flag_counter = 0;
         }
 
     }
@@ -74,11 +63,11 @@ bool read_all(char *buffer, int len) {
     return true;
 }
 
-char *parse_message(unsigned int &message_length, unsigned int &message_id, string &result_string) {
+char *parse_message(unsigned int &message_length, unsigned int &message_id) {
 
     char header[HEADER_SIZE];
-    int ret = read_all(header, HEADER_SIZE);
-    assert(ret);
+    read_all(header, HEADER_SIZE);
+
 
     message_id = header[0];
     int msgSize = get_message_size_from_message_id(message_id);
@@ -90,16 +79,14 @@ char *parse_message(unsigned int &message_length, unsigned int &message_id, stri
         message[index] = START_FLAG[index];
         ++index;
     }
-    int header_index=0;
+    int header_index = 0;
     while (index < START_FLAG_LENGTH + HEADER_SIZE) {
         message[index] = header[header_index];
         ++index;
         ++header_index;
     }
 
-    ret = read_all(message + index, message_length - HEADER_SIZE - START_FLAG_LENGTH);
-    assert(ret);
-    result_string=message;
+    read_all(message + index, message_length - HEADER_SIZE - START_FLAG_LENGTH);
     return message;
 
 }
@@ -111,14 +98,14 @@ bool is_valid(char *message, unsigned int message_length) {
     int crc_index = message_length - CHECKSUM_SIZE;
     for (int i = START_FLAG_LENGTH; i < crc_index; ++i) {
         //Separator every 5 bytes
-        if ((i > 5) && ((i+1) % 5 == 0)) {
+        if ((i > 5) && ((i + 1) % 5 == 0)) {
             separator = message[i];
             if (separator != SEPARATOR) {
                 return false;
             }
         }
         else {
-            char data_byte=message[i];
+            char data_byte = message[i];
             data += data_byte;
         }
     }
@@ -131,11 +118,10 @@ bool is_valid(char *message, unsigned int message_length) {
     u_int32_t crc = 0;
     read_unsigned_int(message + crc_index, sizeof(uint32_t), crc);
     int computed_crc = get_crc_32(data);
-    assert(crc != computed_crc);
-    if (crc != computed_crc)
-        return true;
-    else
-        return false;
+
+     cout << " Computed CRC " << std::hex << computed_crc << " Expected CRC " <<std::hex<< crc<< endl;
+    return crc == computed_crc;
+
 
 }
 

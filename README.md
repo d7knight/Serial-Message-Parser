@@ -9,8 +9,9 @@ I programmed the serial message parser in C++ and also used Jetbrains Clion IDE.
 
 1. clone the repo 
 2. open a terminal  
-3. execute `make`  
-4. execute `./skyladders`  
+3. execute `cmake .` 
+4. execute `make`  
+5. execute `./skyladders`  
 
 -There are three messages with message id's 1,2 and 3 being read from the serial adapter. Furthermore there is garbage data being rceived between each of the messages. It is intentional that some messages don't have a matching checksum to test out the parser's discarding behaviour.
 

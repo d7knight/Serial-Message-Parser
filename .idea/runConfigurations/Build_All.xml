@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build All" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="skyladders" TARGET_NAME="skyladders" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="skyladders" RUN_TARGET_NAME="skyladders">
-    <envs />
-    <method />
-  </configuration>
-</component>

@@ -2,8 +2,8 @@
 // Created by dave on 12/09/15.
 //
 
-#ifndef SKYLADDERS_SERIAL_MESSAGE_PARSER_H
-#define SKYLADDERS_SERIAL_MESSAGE_PARSER_H
+#ifndef SERIAL_MESSAGE_PARSER_H
+#define SERIAL_MESSAGE_PARSER_H
 #include <string>
 const char SEPARATOR = 0xFE;
 const char START_BYTE = 0xFF;
@@ -22,4 +22,4 @@ char *parse_message(unsigned int &message_length, unsigned int &message_id);
 //Checks if a message is valid, if the formatting of the message (Separator positioning) and the checksum are correct
 bool is_valid(char *message, unsigned int message_length);
 
-#endif //SKYLADDERS_SERIAL_MESSAGE_PARSER_H
+#endif //SERIAL_MESSAGE_PARSER_H
